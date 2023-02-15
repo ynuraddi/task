@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  db:
+    image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    ports:
+      - 27017:27017
+  app:
+    environment:
+      - db_dsn=mongodb://root:root@db:27017
+      - app_port=3000
+      - salt_host=salt
+      - salt_port=9000
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile
+    ports:
+      - 3000:3000
+    command: cmd/app
+    # depends_on:
+    #   - db
+  salt:
+    environment:
+      - salt_port=9000
+    build:
+      context: .
+      dockerfile: ./docker/salt/Dockerfile
+    ports:
+      - 9000:9000
+    command: cmd/salt
+    depends_on:
+      - db
